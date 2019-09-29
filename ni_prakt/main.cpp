@@ -7,9 +7,23 @@
 //
 
 #include <iostream>
+#include "task1.hpp"
+#include "task2.hpp"
+#include "task3.hpp"
 
 int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::cout << "Hello, World!\n";
+    if(argc > 1) {
+        if(*argv[1] == '1') {
+            task1();
+        }
+        else if(*argv[1] == '2') {
+            task2();
+        }
+        else if(*argv[1] == '3') {
+            task3();
+        }
+    } else {
+        std::cerr << "Run with a parameter [ 1 | 2 | 3 ]" << std::endl;
+    }
     return 0;
 }

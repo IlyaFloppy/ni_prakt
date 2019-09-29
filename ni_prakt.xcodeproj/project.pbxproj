@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		0925E1C1233CDCA5008EC4D9 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0925E1C0233CDCA5008EC4D9 /* main.cpp */; };
+		0925E1C9233CDF6D008EC4D9 /* task1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0925E1C7233CDF6D008EC4D9 /* task1.cpp */; };
+		0925E1CC233CDF7F008EC4D9 /* task2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0925E1CA233CDF7F008EC4D9 /* task2.cpp */; };
+		0925E1CF233CDF8A008EC4D9 /* task3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0925E1CD233CDF8A008EC4D9 /* task3.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +28,12 @@
 /* Begin PBXFileReference section */
 		0925E1BD233CDCA5008EC4D9 /* ni_prakt */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ni_prakt; sourceTree = BUILT_PRODUCTS_DIR; };
 		0925E1C0233CDCA5008EC4D9 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		0925E1C7233CDF6D008EC4D9 /* task1.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = task1.cpp; sourceTree = "<group>"; };
+		0925E1C8233CDF6D008EC4D9 /* task1.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = task1.hpp; sourceTree = "<group>"; };
+		0925E1CA233CDF7F008EC4D9 /* task2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = task2.cpp; sourceTree = "<group>"; };
+		0925E1CB233CDF7F008EC4D9 /* task2.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = task2.hpp; sourceTree = "<group>"; };
+		0925E1CD233CDF8A008EC4D9 /* task3.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = task3.cpp; sourceTree = "<group>"; };
+		0925E1CE233CDF8A008EC4D9 /* task3.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = task3.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +67,12 @@
 			isa = PBXGroup;
 			children = (
 				0925E1C0233CDCA5008EC4D9 /* main.cpp */,
+				0925E1C7233CDF6D008EC4D9 /* task1.cpp */,
+				0925E1C8233CDF6D008EC4D9 /* task1.hpp */,
+				0925E1CA233CDF7F008EC4D9 /* task2.cpp */,
+				0925E1CB233CDF7F008EC4D9 /* task2.hpp */,
+				0925E1CD233CDF8A008EC4D9 /* task3.cpp */,
+				0925E1CE233CDF8A008EC4D9 /* task3.hpp */,
 			);
 			path = ni_prakt;
 			sourceTree = "<group>";
@@ -93,6 +108,7 @@
 				TargetAttributes = {
 					0925E1BC233CDCA5008EC4D9 = {
 						CreatedOnToolsVersion = 11.0;
+						LastSwiftMigration = 1100;
 					};
 				};
 			};
@@ -119,7 +135,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0925E1CF233CDF8A008EC4D9 /* task3.cpp in Sources */,
+				0925E1C9233CDF6D008EC4D9 /* task1.cpp in Sources */,
 				0925E1C1233CDCA5008EC4D9 /* main.cpp in Sources */,
+				0925E1CC233CDF7F008EC4D9 /* task2.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -238,20 +257,35 @@
 		0925E1C5233CDCA5008EC4D9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = RW447YF5Z4;
 				ENABLE_HARDENED_RUNTIME = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
 		0925E1C6233CDCA5008EC4D9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = RW447YF5Z4;
 				ENABLE_HARDENED_RUNTIME = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
