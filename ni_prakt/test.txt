@@ -1,0 +1,4 @@
+add dive 10
+add lift spiral 5 1
+add move asdepth parallel 12 81 1
+add return 1 2 3

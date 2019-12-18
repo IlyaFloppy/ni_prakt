@@ -48,8 +48,6 @@ public:
 
 
 class Mission {
-protected:
-    std::string name;
 public:
     
     virtual ~Mission() {};
@@ -87,13 +85,14 @@ public:
     }
     
     Vector & apply(Vector &vector, Region &region) override {
-        vector.y = distanceAsDepth ? -distance : distance - region.depth;
+        vector.y -= distance;
         if(
-           std::abs(vector.x) + this->radius > region.length ||
-           std::abs(vector.z) + this->radius > region.width) {
+           std::abs(vector.x) + this->radius > region.length / 2 ||
+           std::abs(vector.z) + this->radius > region.width / 2) {
             throw std::invalid_argument("uuv has gone out of region");
         }
-        if(vector.y < region.depth) {
+        if(vector.y < -region.depth) {
+            std::cerr << vector.y << std::endl;
             throw std::invalid_argument("uuv is six feet under ground");
         }
         if(vector.y > 0) {
@@ -114,7 +113,6 @@ public:
 };
 
 
-// я очень ленивый
 class Lift : public Dive {
 public:
     Lift(double distance, bool distanceAsDepth, double radius) : Dive(-distance, distanceAsDepth, radius) {}
@@ -127,6 +125,23 @@ public:
                dtos(-this->distance) +
                std::string(this->type == Type::Spiral ? " " : "") +
                (this->type == Type::Spiral ? dtos(this->radius) : std::string(""));
+    }
+    
+    Vector & apply(Vector &vector, Region &region) override {
+        vector.y += distance;
+        if(
+           std::abs(vector.x) + this->radius > region.length / 2 ||
+           std::abs(vector.z) + this->radius > region.width / 2) {
+            throw std::invalid_argument("uuv has gone out of region");
+        }
+        if(vector.y < -region.depth) {
+            std::cerr << vector.y << std::endl;
+            throw std::invalid_argument("uuv is six feet under ground");
+        }
+        if(vector.y > 0) {
+            throw std::invalid_argument("uuvs don't fly, do they?");
+        }
+        return vector;
     }
 };
 
@@ -154,22 +169,25 @@ public:
         vector.x = this->x;
         vector.z = this->z;
         if(
-           std::abs(vector.x) > region.length ||
-           std::abs(vector.z) > region.width) {
+           std::abs(vector.x) > region.length / 2 ||
+           std::abs(vector.z) > region.width / 2) {
             throw std::invalid_argument("uuv has gone out of region");
         }
         return vector;
     }
     
-     std::string toString() override {
-           return std::string("move") +
-                  std::string(this->depthControl == DepthControl::ConstantDepth ? " asdepth " : " ") +
-                  dtos(this->x) +
-                  std::string(" ") +
-                  dtos(this->z) +
-                  std::string(" ") +
-                  dtos(this->precision);
-       }
+    std::string toString() override {
+        auto constDepth = this->depthControl == DepthControl::ConstantDepth;
+        auto parallel = this->type == Type::Parallel;
+        return std::string("move") +
+        std::string(constDepth ? " asdepth" : "") +
+        std::string(parallel ? " parallel " : " ") +
+        dtos(this->x) +
+        std::string(" ") +
+        dtos(this->z) +
+        std::string(" ") +
+        dtos(this->precision);
+    }
 };
 
 

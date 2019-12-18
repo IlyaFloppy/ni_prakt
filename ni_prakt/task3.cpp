@@ -10,17 +10,146 @@
 
 enum class Task {Add, Remove, Edit, Exit, Save};
 
+void add(std::vector<Mission*> &missions, std::vector<std::string> &command, int index = -1, bool replace = false) {
+    if(command.at(1) == "dive") {
+        bool distanceAsDepth = std::find(command.begin(), command.end(), "asdepth") != command.end();
+        command.erase(std::remove(command.begin(), command.end(), "asdepth"), command.end());
+        bool spiral = std::find(command.begin(), command.end(), "spiral") != command.end();
+        command.erase(std::remove(command.begin(), command.end(), "spiral"), command.end());
+        double distance = std::stod(command.at(2));
+        double radius = -1;
+        if(spiral) {
+            if(command.size() > 3) {
+                radius = std::stod(command.at(3));
+            }
+            else {
+                radius = Dive::DEFAULT_RADIUS;
+            }
+        }
+        
+        Dive* mission = new Dive(distance, distanceAsDepth, radius);
+        
+        if (index == -1) {
+            missions.push_back(mission);
+        } else if (replace) {
+            Mission *old = missions[index];
+            delete old;
+            missions[index] = mission;
+        } else {
+            missions.insert(missions.begin() + index, mission);
+        }
+        
+    }
+    if(command.at(1) == "lift") {
+        bool distanceAsDepth = std::find(command.begin(), command.end(), "asdepth") != command.end();
+        command.erase(std::remove(command.begin(), command.end(), "asdepth"), command.end());
+        bool spiral = std::find(command.begin(), command.end(), "spiral") != command.end();
+        command.erase(std::remove(command.begin(), command.end(), "spiral"), command.end());
+        double distance = std::stod(command.at(2));
+        double radius = -1;
+        if(spiral) {
+            if(command.size() > 3) {
+                radius = std::stod(command.at(3));
+            }
+            else {
+                radius = Lift::DEFAULT_RADIUS;
+            }
+        }
+        
+        Lift* mission = new Lift(distance, distanceAsDepth, radius);
+        
+        if (index == -1) {
+            missions.push_back(mission);
+        } else if (replace) {
+            Mission *old = missions[index];
+            delete old;
+            missions[index] = mission;
+        } else {
+            missions.insert(missions.begin() + index, mission);
+        }
+    }
+    if(command.at(1) == "move") {
+        bool parallel = std::find(command.begin(), command.end(), "parallel") != command.end();
+        command.erase(std::remove(command.begin(), command.end(), "parallel"), command.end());
+        bool distanceAsDepth = std::find(command.begin(), command.end(), "asdepth") != command.end();
+        command.erase(std::remove(command.begin(), command.end(), "asdepth"), command.end());
+        double x = std::stod(command.at(2));
+        double z = std::stod(command.at(3));
+        double precision = Move::DEFAULT_PRECISION;
+        if(command.size() > 4) {
+            precision = std::stod(command.at(4));
+        }
+        
+        Move* mission = new Move(x, z, precision,
+                                 distanceAsDepth ? Move::DepthControl::ConstantDepth : Move::DepthControl::ConstantDistance,
+                                 parallel ? Move::Type::Parallel : Move::Type::ToPoint);
+        
+        if (index == -1) {
+            missions.push_back(mission);
+        } else if (replace) {
+            Mission *old = missions[index];
+            delete old;
+            missions[index] = mission;
+        } else {
+            missions.insert(missions.begin() + index, mission);
+        }
+    }
+    if(command.at(1) == "return") {
+        double x = std::stod(command.at(2));
+        double y = std::stod(command.at(3));
+        double z = std::stod(command.at(4));
+        
+        Return* mission = new Return(x, y, z);
+        
+        if (index == -1) {
+            missions.push_back(mission);
+        } else if (replace) {
+            Mission *old = missions[index];
+            delete old;
+            missions[index] = mission;
+        } else {
+            missions.insert(missions.begin() + index, mission);
+        }
+    }
+}
 
-void task3() {
+void save(std::vector<Mission*> &missions, std::string filename) {
+    std::ofstream file;
+    file.open(filename);
+    for(int i = 0; i < missions.size(); i++) {
+        file << "add " << missions.at(i)->toString() << std::endl;
+    }
+    file.close();
+}
+
+bool apply(std::vector<Mission*> &missions) {
+    auto reg = Region(10000, 10000, 100);
+    auto pos = Vector(0, 0, 0);
+    try {
+        for (int i = 0; i < missions.size(); i++) {
+            missions.at(i)->apply(pos, reg);
+        }
+        if (dynamic_cast<Return*>(missions.at(missions.size() - 1)) == nullptr) {
+            throw std::invalid_argument("list has to end with return");
+        }
+    } catch (std::exception &e) {
+        std::cerr << "error applying to vector" << std::endl;
+        std::cerr << e.what() << std::endl;
+        return false;
+    }
+    return true;
+}
+
+std::vector<Mission*> readFromStream(std::istream &stream) {
     const std::string delimiter = " ";
+    std::vector<Mission*> missions;
     std::string input;
     
-    std::vector<Mission*> missions;
-    
-    while(true) {
+    while (true) {
         std::vector<std::string> command;
-    
-        std::getline(std::cin, input);
+        
+        if(!std::getline(stream, input))
+            break;
         
         size_t pos = 0;
         std::string word;
@@ -36,78 +165,13 @@ void task3() {
             if(command.at(0) == "exit") {
                 break;
             }
-            if(command.at(0) == "help" || command.at(0) == "h" || command.at(0) == "?") {
-                std::cout << "Help yourself" << std::endl;
-            }
             if(command.at(0) == "list" || command.at(0) == "ls") {
                 for(int i = 0; i < missions.size(); i++) {
                     std::cout << (i + 1) << ". " << missions.at(i)->toString() << std::endl;
                 }
             }
             if(command.at(0) == "add") {
-                if(command.at(1) == "dive") {
-                    bool distanceAsDepth = std::find(command.begin(), command.end(), "asdepth") != command.end();
-                    command.erase(std::remove(command.begin(), command.end(), "asdepth"), command.end());
-                    bool spiral = std::find(command.begin(), command.end(), "spiral") != command.end();
-                    command.erase(std::remove(command.begin(), command.end(), "spiral"), command.end());
-                    double distance = std::stod(command.at(2));
-                    double radius = -1;
-                    if(spiral) {
-                        if(command.size() > 3) {
-                            radius = std::stod(command.at(3));
-                        }
-                        else {
-                            radius = Dive::DEFAULT_RADIUS;
-                        }
-                    }
-                    
-                    Dive* mission = new Dive(distance, distanceAsDepth, radius);
-                    missions.push_back(mission);
-                }
-                if(command.at(1) == "lift") {
-                    bool distanceAsDepth = std::find(command.begin(), command.end(), "asdepth") != command.end();
-                    command.erase(std::remove(command.begin(), command.end(), "asdepth"), command.end());
-                    bool spiral = std::find(command.begin(), command.end(), "spiral") != command.end();
-                    command.erase(std::remove(command.begin(), command.end(), "spiral"), command.end());
-                    double distance = std::stod(command.at(2));
-                    double radius = -1;
-                    if(spiral) {
-                        if(command.size() > 3) {
-                            radius = std::stod(command.at(3));
-                        }
-                        else {
-                            radius = Lift::DEFAULT_RADIUS;
-                        }
-                    }
-                    
-                    Lift* mission = new Lift(distance, distanceAsDepth, radius);
-                    missions.push_back(mission);
-                }
-                if(command.at(1) == "move") {
-                    bool parallel = std::find(command.begin(), command.end(), "parallel") != command.end();
-                    command.erase(std::remove(command.begin(), command.end(), "parallel"), command.end());
-                    bool distanceAsDepth = std::find(command.begin(), command.end(), "asdepth") != command.end();
-                    command.erase(std::remove(command.begin(), command.end(), "asdepth"), command.end());
-                    double x = std::stod(command.at(2));
-                    double z = std::stod(command.at(3));
-                    double precision = Move::DEFAULT_PRECISION;
-                    if(command.size() > 4) {
-                        precision = std::stod(command.at(4));
-                    }
-                    
-                    Move* mission = new Move(x, z, precision,
-                                             distanceAsDepth ? Move::DepthControl::ConstantDepth : Move::DepthControl::ConstantDistance,
-                                             parallel ? Move::Type::Parallel : Move::Type::ToPoint);
-                    missions.push_back(mission);
-                }
-                if(command.at(1) == "return") {
-                    double x = std::stod(command.at(2));
-                    double y = std::stod(command.at(3));
-                    double z = std::stod(command.at(4));
-                    
-                    Return* mission = new Return(x, y, z);
-                    missions.push_back(mission);
-                }
+                add(missions, command);
             }
             if(command.at(0) == "remove") {
                 int index = std::stoi(command.at(1));
@@ -129,24 +193,57 @@ void task3() {
                 std::iter_swap(missions.begin() + index1 - 1, missions.begin() + index2 - 1);
             }
             if(command.at(0) == "edit") {
-                // TODO: whatever
+                int index = std::stoi(command.at(1));
+                command.erase(std::remove(command.begin(), command.end(), "edit"), command.end());
+                if(index < 1 or index > missions.size()) {
+                    throw std::invalid_argument("wrong index");
+                }
+                add(missions, command, index - 1, true);
+            }
+            if(command.at(0) == "insert") {
+                int index = std::stoi(command.at(1));
+                command.erase(std::remove(command.begin(), command.end(), "insert"), command.end());
+                if(index < 1 or index > missions.size()) {
+                    throw std::invalid_argument("wrong index");
+                }
+                add(missions, command, index - 1, false);
             }
             if(command.at(0) == "save") {
                 std::string filename = command.at(1);
                 
-                std::ofstream file;
-                file.open(filename);
-                for(int i = 0; i < missions.size(); i++) {
-                    file << "add " << missions.at(i)->toString() << std::endl;
+                // check if mission are ok
+                if (apply(missions)) {
+                    save(missions, filename);
                 }
-                file.close();
             }
             if(command.at(0) == "load") {
-                std::cerr << "Run:\n$ cat filename.txt - | ./ni_prakt 3\nfrom shell to load file" << std::endl;
+                std::string filename = command.at(1);
+                
+                std::ifstream fileStream(filename);
+                if (fileStream.is_open()) {
+                    auto newMissions = readFromStream(fileStream);
+                    
+                    for(int i = 0; i < missions.size(); i++) {
+                        delete missions.at(i);
+                    }
+                    
+                    missions = newMissions;
+                }
             }
+            
+            apply(missions);
+            // autosave always
+            save(missions, "autosave.txt");
+            
         } catch(std::exception &e) {
             std::cerr << "wrong syntax" << std::endl;
             std::cerr << e.what() << std::endl;
         }
     }
+    
+    return missions;
+}
+
+void task3() {
+    readFromStream(std::cin);
 }
